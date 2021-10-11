@@ -18,53 +18,68 @@ struct node
 	int vertex;
 	struct node* next;
 };
-struct node* createNode(int);
+
+struct node* createNode(int v);
+
 struct Graph
 {
-	int *visited;
 	int numVertices;
-	struct node** adjLists;
+	int* visited;
+	struct node** adjLists; // we need int** to store a two dimensional array. Similary, we need struct node** to store an array of Linked lists
 };
 
+struct Graph* createGraph(int);
+void addEdge(struct Graph*, int, int);
+void printGraph(struct Graph*);
+void DFS(struct Graph*, int);
 
-struct Graph* createGraph(int vertices);
-
-void addEdge(struct Graph* graph, int src, int dest);
-
-void printGraph(struct Graph* graph);
-void search(struct Graph* graph);
-//void DFS2(struct Graph* graph, int vertex);
 
 int main1()
 {
 	setlocale(LC_ALL, "Rus");
+
 	int versh, * a, i, ver, conect;
-	printf("Введите количество вершин: ");
-	scanf("%d", &versh);
+	//printf("Введите количество вершин: ");
+	//scanf("%d", &versh);
 
-	a = (int*)malloc(versh * sizeof(int));
+   // a = (int*)malloc(versh * sizeof(int));
 
-	struct Graph* graph = createGraph(versh);
-
-	for (i = 0; i < versh - 1; i++)
-	{
-		conect = i+1;
-		ver = conect-1;
-		addEdge(graph, ver, conect);
-	}
-
-
+	struct Graph* graph = createGraph(5);
+	addEdge(graph, 0, 1);
+	addEdge(graph, 2, 0);
+	addEdge(graph, 0, 3);
+	addEdge(graph, 2, 1);
+	addEdge(graph, 2, 4);
 
 	printGraph(graph);
-	//DFS2(graph, 2);
-	//search(graph);
+
+	DFS(graph, 4);
+
 	return 0;
+}
+
+void DFS(struct Graph* graph, int vertex) {
+	struct node* adjList = graph->adjLists[vertex];
+	struct node* temp = graph->adjLists[vertex];
+
+	graph->visited[vertex] = 1;
+	printf(" %  d ", vertex);
+
+	while (temp != NULL) {
+		int connectedVertex = temp->vertex;
+
+		if (graph->visited[connectedVertex] == 0) {
+			DFS(graph, connectedVertex);
+		}
+		temp = temp->next;
+	}
 }
 
 
 struct node* createNode(int v)
 {
 	struct node* newNode = (struct node*)malloc(sizeof(struct node));
+
 	newNode->vertex = v;
 	newNode->next = NULL;
 	return newNode;
@@ -75,25 +90,28 @@ struct Graph* createGraph(int vertices)
 	struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
 	graph->numVertices = vertices;
 
+	//graph->adjLists = (struct Graph*)malloc(vertices * sizeof(struct node*));
 	graph->adjLists = (struct node**)malloc(vertices * sizeof(struct node*));
 
-	graph->visited = 0;
+	graph->visited = (int*)malloc(vertices * sizeof(int));
+
 
 	int i;
-	for (i = 0; i < vertices; i++)
+	for (i = 0; i < vertices; i++) {
 		graph->adjLists[i] = NULL;
-
+		graph->visited[i] = 0;
+	}
 	return graph;
 }
 
 void addEdge(struct Graph* graph, int src, int dest)
 {
-	
+	// Add edge from src to dest
 	struct node* newNode = createNode(dest);
 	newNode->next = graph->adjLists[src];
 	graph->adjLists[src] = newNode;
 
-	
+	// Add edge from dest to src
 	newNode = createNode(src);
 	newNode->next = graph->adjLists[dest];
 	graph->adjLists[dest] = newNode;
@@ -105,7 +123,7 @@ void printGraph(struct Graph* graph)
 	for (v = 0; v < graph->numVertices; v++)
 	{
 		struct node* temp = graph->adjLists[v];
-		printf("\n Список смежности вершины %d\n ", v);
+		printf("\n Список смежности вершины  %d\n ", v);
 		while (temp)
 		{
 			printf("%d -> ", temp->vertex);
@@ -115,43 +133,13 @@ void printGraph(struct Graph* graph)
 	}
 }
 
-/*void DFS2(struct Graph* graph, int vertex) {
-	struct node* adjList = graph->adjLists[vertex];
-	struct node* temp = adjList;
-	int visited[2];
-	visited[vertex] = 1;
-
-	printf(" вершина %d \n", vertex);
-
-	while (temp != NULL) {
-		int connectedVertex = temp->vertex;
-
-		if (visited[connectedVertex] == 0) {
-			DFS2(graph, connectedVertex);
-		}
-		temp = temp->next;
-	}
-}*/
 
 
-void search(struct Graph* graph)
-{
-	int v;
-	printf("\n Список смежности вершины");
-	for (v = 0; v < graph->numVertices; v++)
-	{
-		struct node* temp = graph->adjLists[v];
-		
-		while (temp)
-		{
-			printf("% d", temp->vertex);
 
-			temp = temp->next;
 
-		}
-		
-	}
-}
+
+
+
 //////////////////////////////
 
 //поиск в глубину
